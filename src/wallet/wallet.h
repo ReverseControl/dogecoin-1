@@ -50,7 +50,8 @@ static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 static const CAmount DEFAULT_TRANSACTION_FEE = COIN;
 //! -fallbackfee default
 //mlumin: 5/2021 scaled minimum, this likely will have to change for fee reduction
-static const CAmount DEFAULT_FALLBACK_FEE = COIN;
+//rnicoll: 8/2021 reduce to 1,000,000 Koinu
+static const CAmount DEFAULT_FALLBACK_FEE = COIN / 100;
 //! -mintxfee default
 static const CAmount DEFAULT_TRANSACTION_MINFEE = COIN;
 //mlumin 5/2021: adding a minimum Wallet fee vs relay, currently still 1 COIN, to be reduced.
