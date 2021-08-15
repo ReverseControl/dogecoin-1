@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(GetMinimumFee_dust_test)
     CMutableTransaction tx;
     CTxMemPool pool(payTxFee);
     CTxOut txout1(139496846, (CScript)vector<unsigned char>(24, 0)); // Regular output
-    CTxOut txout2(15499649, (CScript)vector<unsigned char>(24, 0)); // Dust output
+    CTxOut txout2(154996, (CScript)vector<unsigned char>(24, 0)); // Dust output
     tx.vout.push_back(txout1);
     tx.vout.push_back(txout2);
 
@@ -529,7 +529,7 @@ BOOST_AUTO_TEST_CASE(GetMinimumFee_dust_test)
 
     // change the hard dust limit
 
-    nDustLimit = COIN / 10;
+    nDustLimit = COIN / 1000;
 
     // Confirm dust penalty fees are not added
 
