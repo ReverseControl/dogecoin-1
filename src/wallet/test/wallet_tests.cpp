@@ -504,9 +504,9 @@ BOOST_AUTO_TEST_CASE(GetMinimumFee_test)
 
     int64_t nMinTxFee = COIN / 100;
 
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 250, 0, pool), nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), 2 * nMinTxFee);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 250, 0, pool), nMinTxFee * 0.25);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), nMinTxFee * 1.0);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), nMinTxFee * 1.999);
 }
 
 BOOST_AUTO_TEST_CASE(GetMinimumFee_dust_test)
@@ -519,13 +519,14 @@ BOOST_AUTO_TEST_CASE(GetMinimumFee_dust_test)
     tx.vout.push_back(txout1);
     tx.vout.push_back(txout2);
 
-    int64_t nMinTxFee = COIN / 100;
+    CAmount nMinTxFee = COIN / 100;
 
     // Confirm dust penalty fees are added on
+    CAmount nDustPenalty = COIN / 100;
 
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 963, 0, pool), 2 * nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), 2 * nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), 3 * nMinTxFee);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 963, 0, pool), nDustPenalty + (nMinTxFee * 0.963));
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), nDustPenalty + (nMinTxFee * 1.000));
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), nDustPenalty + (nMinTxFee * 1.999));
 
     // change the hard dust limit
 
@@ -533,9 +534,9 @@ BOOST_AUTO_TEST_CASE(GetMinimumFee_dust_test)
 
     // Confirm dust penalty fees are not added
 
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 963, 0, pool), 1 * nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), 1 * nMinTxFee);
-    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), 2 * nMinTxFee);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 963, 0, pool), nMinTxFee * 0.963);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1000, 0, pool), nMinTxFee * 1.000);
+    BOOST_CHECK_EQUAL(CWallet::GetMinimumFee(tx, 1999, 0, pool), nMinTxFee * 1.999);
 
     nDustLimit = COIN;
 }
