@@ -53,9 +53,9 @@ static const CAmount DEFAULT_TRANSACTION_FEE = COIN;
 //rnicoll: 8/2021 reduce to 1,000,000 Koinu
 static const CAmount DEFAULT_FALLBACK_FEE = COIN / 100;
 //! -mintxfee default
-static const CAmount DEFAULT_TRANSACTION_MINFEE = COIN;
+static const CAmount DEFAULT_TRANSACTION_MINFEE = COIN / 100;
 //mlumin 5/2021: adding a minimum Wallet fee vs relay, currently still 1 COIN, to be reduced.
-static const CAmount DEFAULT_MIN_WALLET_TX_FEE = COIN;
+static const CAmount DEFAULT_MIN_WALLET_TX_FEE = COIN / 100;
 //! minimum recommended increment for BIP 125 replacement txs
 static const CAmount WALLET_INCREMENTAL_RELAY_FEE = COIN/10 * 5;
 //! target minimum change amount
