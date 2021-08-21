@@ -23,6 +23,7 @@
 
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <lowlevel.h>
 
 static void RandFailure()
 {
@@ -129,20 +130,75 @@ void GetRandBytes(unsigned char* buf, int num)
     }
 }
 
+
+/* /fn int getRNSEED( uint64_t *buff, int num)
+ * /brief Use Intel's SP 800-90B & C compliant Hardware implemented
+ *        instruction to add entropy to the pool use to create keys. 
+ *
+ *        For details, see: https://software.intel.com/content/www/us/en/develop/blogs/the-difference-between-rdrand-and-rdseed.html
+ * 
+ *  /param buff Buffer to fill with random bits.
+ *  /param num  Number of 64-bit words to write to buffer.
+ *  /return     Returns 1 if the hardware returned  a valid stream of random numbers, 0 otherwise.
+ *
+ */
+int getRDSEED( uint64_t *buff, uint32_t num){
+    //Check to see if the processor running this code has 
+    //this Instruction. Most Intel/AMD CPUs after 2015
+    //should have this instruction.
+    uint32_t level, eax, ebx, ecx, edx; 
+    
+    //Level where the RNSEED feature is described
+    level = 1;
+
+    //Extract feature vector
+    __get_cpuid(level, &eax, &ebx, &ecx, &edx);    
+
+    //Initialize state to 0, or failed.
+    uint32_t  cumulativeStatus = 0;
+
+    //Check if RNSEED exists on this processor
+    if( (ecx & bit_RDSEED) == bit_RDSEED ) {
+
+        //Re-initialize value to 1, or success 
+        cumulativeStatus = 1;
+
+        for( uint32_t kk = 0; kk < num; kk++){
+            //Get rng data
+            unsigned long long int rng;
+            uint32_t status = _rdseed64_step( &rng );
+
+            //Store seed data
+            buff[kk] = rng; 
+
+            //Update status value
+            cumulativeStatus &= ( status == 1) ? 1 : 0;
+        }
+    } 
+
+    return cumulativeStatus;
+}
+
 void GetStrongRandBytes(unsigned char* out, int num)
 {
     assert(num <= 32);
     CSHA512 hasher;
+    block_512bits buf2;
     unsigned char buf[64];
 
     // First source: OpenSSL's RNG
     RandAddSeedPerfmon();
-    GetRandBytes(buf, 32);
-    hasher.Write(buf, 32);
+    GetRandBytes(buf, 64);
+    hasher.Write(buf, 64);
 
     // Second source: OS RNG
     GetOSRand(buf);
-    hasher.Write(buf, 32);
+    hasher.Write(buf, 64);
+
+    //Third Source: Intel's NIST SP 800-90B & C compliant RBG
+    //if available, use it.
+    if ( getRDSEED(buf2.qword, 64) == 1  )
+        hasher.Write(buf2.ubyte, 64);
 
     // Produce output
     hasher.Finalize(buf);
