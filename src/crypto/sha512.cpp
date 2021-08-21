@@ -217,12 +217,14 @@ int main(){
 
 
     //Prepare test data
-    unsigned char buf[64] = {0};
-    uint64_t      *prt;
-    prt = (uint64_t*) buf;
+    unsigned char buf[0];
 
     //Initialize digest and process buffer
+    char buflen = 0;
+    unsigned char rbuf[64];
+    CSHA512().Write(buf, buflen).Finalize(rbuf);
     CSHA512 hasher;
+    hasher.Write(buf, 0);   //Tried both 3 and 64
 
     //Finalize digest
     hasher.Finalize(buf);
@@ -230,16 +232,10 @@ int main(){
     //Print final digest 
     std::cout << "Dogecoin's Bitcoin Sha512 Implementation (Input = 0xffffff )" << std::endl; 
     std::cout << "Digest is: "; 
-    for( int kk=0; kk < 8; kk++){
-        std::cout << std::hex
-                  << std::noshowbase
-                  << std::setw(16)
-                  << std::setfill('0') 
-                  << prt[ kk ];
-    }
-
-    std::cout << std::endl;
-
+    int i = 0;
+    for(i = 0; i < sizeof(rbuf); i++)
+       printf("%02x", buf[i]);
+    printf("\n");
 
     return 0;
 }
