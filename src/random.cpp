@@ -143,38 +143,47 @@ void GetRandBytes(unsigned char* buf, int num)
  *
  */
 int getRDSEED( uint64_t *buff, uint32_t num){
-    //Check to see if the processor running this code has 
-    //this Instruction. Most Intel/AMD CPUs after 2015
-    //should have this instruction.
-    uint32_t level, eax, ebx, ecx, edx; 
-    
-    //Level where the RNSEED feature is described
-    level = 1;
-
-    //Extract feature vector
-    __get_cpuid(level, &eax, &ebx, &ecx, &edx);    
-
     //Initialize state to 0, or failed.
     uint32_t  cumulativeStatus = 0;
 
-    //Check if RNSEED exists on this processor
-    if( (ecx & bit_RDSEED) == bit_RDSEED ) {
+    #ifdef LOWLEVEL_H
+        //Check to see if the processor running this code has 
+        //this Instruction. Most Intel/AMD CPUs after 2015
+        //should have this instruction.
+        uint32_t level, eax, ebx, ecx, edx; 
+        
+        //Level where the RNSEED feature is described
+        level = 1;
+    
+        //Extract feature vector
+        __get_cpuid(level, &eax, &ebx, &ecx, &edx);    
+    
+        //Check if RNSEED exists on this processor
+        if( (ecx & bit_RDSEED) == bit_RDSEED ) {
+    
+            //Re-initialize value to 1, or success 
+            cumulativeStatus = 1;
+    
+            for( uint32_t kk = 0; kk < num; kk++){
+                //Get rng data
+                unsigned int rng_high, rng_low;
+                int32_t status1 = _rdseed32_step( &rng_low );
+                int32_t status2 = _rdseed32_step( &rng_high );
+    
+                //Place values into a 64-bit register
+                uint64_t temp = rng_high;
+                temp <<= 32;
+                temp += rng_low;
 
-        //Re-initialize value to 1, or success 
-        cumulativeStatus = 1;
-
-        for( uint32_t kk = 0; kk < num; kk++){
-            //Get rng data
-            unsigned long long int rng;
-            uint32_t status = _rdseed64_step( &rng );
-
-            //Store seed data
-            buff[kk] = rng; 
-
-            //Update status value
-            cumulativeStatus &= ( status == 1) ? 1 : 0;
-        }
-    } 
+                //Store into buffer
+                buff[kk] =  temp; 
+    
+                //Update status value. 
+                //cumulativeStatus will be 1 iff all iterations are 1.
+                cumulativeStatus &= status1 & status2;
+            }
+        } 
+    #endif /*LOWLEVEL*/
 
     return cumulativeStatus;
 }
@@ -183,7 +192,6 @@ void GetStrongRandBytes(unsigned char* out, int num)
 {
     assert(num <= 32);
     CSHA512 hasher;
-    block_512bits buf2;
     unsigned char buf[64];
 
     // First source: OpenSSL's RNG
@@ -197,10 +205,13 @@ void GetStrongRandBytes(unsigned char* out, int num)
 
     //Third Source: Intel's NIST SP 800-90B & C compliant RBG
     //if available, use it.
-    if ( getRDSEED(buf2.qword, 64) == 1  )
-        hasher.Write(buf2.ubyte, 64);
+    #ifdef LOWLEVEL_H    
+        block_512bits buf2;
+        if ( getRDSEED(buf2.qword, 64) == 1  )
+            hasher.Write(buf2.ubyte, 64);
+    #endif
 
-    // Produce output
+    // Produce output   
     hasher.Finalize(buf);
     memcpy(out, buf, num);
     memory_cleanse(buf, 64);
