@@ -24,6 +24,10 @@
         
         #include <cpuid.h>
 
+        #ifndef bit_RDSEED
+            #define bit_RDSEED  (1 << 18)
+        #endif
+
         /* To address compatibility issues with MacOS, given the lacking implementation
          * of intrinsics we here implement rdseed in byte code so that we may use it 
          * anywhere the ISA extension permits it.
