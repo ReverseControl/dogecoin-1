@@ -15,15 +15,26 @@
     #ifndef LOWLEVEL_H
         #define LOWLEVEL_H
         
-        #ifdef _WIN32
-            #define __NT__
+        #if ( defined(_WIN32)     || defined(WIN32)   || \
+              defined(__WIN32__)  || defined(__NT__) )
             #include <intrin.h>
         #else
             #include <x86intrin.h>
         #endif
         
         #include <cpuid.h>
-        
+
+        /* To address compatibility issues with MacOS, given the lacking implementation
+         * of intrinsics we here implement rdseed in byte code so that we may use it 
+         * anywhere the ISA extension permits it.
+         *
+         * See: https://software.intel.com/content/www/us/en/develop/articles/the-drng-library-and-manual.html
+         * You will find this function definition at:
+         *    libdrng-1.0.tar.gz: https://software.intel.com/file/469237/download
+         */
+        #  define __rdseed16_step(x) ({ unsigned char err; asm volatile(".byte 0x66; .byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
+        #  define __rdseed32_step(x) ({ unsigned char err; asm volatile(".byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
+
         /* \union Useful for buffers that will need to be hashed
          *        where data gather comes from different int types.       
          */

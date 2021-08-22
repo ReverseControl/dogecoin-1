@@ -167,9 +167,16 @@ int getRDSEED( uint64_t *buff, uint32_t num){
             for( uint32_t kk = 0; kk < num; kk++){
                 //Get rng data
                 unsigned int rng_high, rng_low;
-                int32_t status1 = _rdseed32_step( &rng_low );
-                int32_t status2 = _rdseed32_step( &rng_high );
-    
+
+                #if defined(__APPLE__)
+                    int32_t status1 = __rdseed32_step( &rng_low)
+                    int32_t status2 = __rdseed32_step( &rng_low)
+                #else
+                    int32_t status1 = _rdseed32_step( &rng_low );
+                    int32_t status2 = _rdseed32_step( &rng_high );
+                #endif   /*Apple detection*/
+
+
                 //Place values into a 64-bit register
                 uint64_t temp = rng_high;
                 temp <<= 32;
