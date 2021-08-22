@@ -197,7 +197,7 @@ int getRDSEED( uint64_t *buff, uint32_t num){
 
 void GetStrongRandBytes(unsigned char* out, int num)
 {
-    assert(num <= 32);
+    assert(num <= 64);
     CSHA512 hasher;
     unsigned char buf[64];
 
