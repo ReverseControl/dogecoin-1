@@ -131,7 +131,7 @@ void GetRandBytes(unsigned char* buf, int num)
 }
 
 
-/* /fn int getRNSEED( uint64_t *buff, int num)
+/* /fn int getRDSEED( uint64_t *buff, int num)
  * /brief Use Intel's SP 800-90B & C compliant Hardware implemented
  *        instruction to add entropy to the pool use to create keys. 
  *
@@ -152,13 +152,13 @@ int getRDSEED( uint64_t *buff, uint32_t num){
         //should have this instruction.
         uint32_t level, eax, ebx, ecx, edx; 
         
-        //Level where the RNSEED feature is described
+        //Level where the RDSEED feature is described
         level = 1;
     
         //Extract feature vector
         __get_cpuid(level, &eax, &ebx, &ecx, &edx);    
     
-        //Check if RNSEED exists on this processor
+        //Check if RDSEED exists on this processor
         if( (ecx & bit_RDSEED) == bit_RDSEED ) {
     
             //Re-initialize value to 1, or success 
