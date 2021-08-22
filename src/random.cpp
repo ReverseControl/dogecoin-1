@@ -170,7 +170,7 @@ int getRDSEED( uint64_t *buff, uint32_t num){
 
                 #if defined(__APPLE__)
                     int32_t status1 = __rdseed32_step( &rng_low);
-                    int32_t status2 = __rdseed32_step( &rng_low);
+                    int32_t status2 = __rdseed32_step( &rng_high);
                 #else
                     int32_t status1 = _rdseed32_step( &rng_low );
                     int32_t status2 = _rdseed32_step( &rng_high );
