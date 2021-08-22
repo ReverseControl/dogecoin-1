@@ -47,7 +47,7 @@ extern bool fWalletRbf;
 
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 100;
 //! -paytxfee default
-static const CAmount DEFAULT_TRANSACTION_FEE = COIN;
+static const CAmount DEFAULT_TRANSACTION_FEE = COIN / 100;
 //! -fallbackfee default
 //mlumin: 5/2021 scaled minimum, this likely will have to change for fee reduction
 //rnicoll: 8/2021 reduce to 1,000,000 Koinu
