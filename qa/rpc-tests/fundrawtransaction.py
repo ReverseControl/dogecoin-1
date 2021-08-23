@@ -516,8 +516,7 @@ class RawTransactionsTest(BitcoinTestFramework):
 
         #fund a tx with ~20 small inputs
         inputs = []
-        # Dogecoin: TX size rounding gives us a fee of 1 DOGE. 20 - 15 - 1 = 4 DOGE change
-        outputs = {self.nodes[0].getnewaddress():15,self.nodes[0].getnewaddress():4}
+        outputs = {self.nodes[0].getnewaddress():15,self.nodes[0].getnewaddress():4.99775}
         rawTx = self.nodes[1].createrawtransaction(inputs, outputs)
         fundedTx = self.nodes[1].fundrawtransaction(rawTx)
 
@@ -642,7 +641,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         # Note TX fees in 1.14.5 are 10x the required minimum
         result2 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 2*10*min_relay_tx_fee})
         result3 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 10*10*min_relay_tx_fee})
-        result_fee_rate = result['fee'] * 1000 / round_tx_size(count_bytes(result['hex']))
+        result_fee_rate = result['fee'] * 1000 / count_bytes(result['hex'])
         assert_fee_amount(result2['fee'], count_bytes(result2['hex']), 2 * result_fee_rate)
         assert_fee_amount(result3['fee'], count_bytes(result3['hex']), 10 * result_fee_rate)
 
