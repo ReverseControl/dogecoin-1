@@ -171,11 +171,18 @@ AC_ARG_WITH([system-univalue],
   [system_univalue=$withval],
   [system_univalue=no]
 )
+
 AC_ARG_ENABLE([zmq],
   [AS_HELP_STRING([--disable-zmq],
   [disable ZMQ notifications])],
   [use_zmq=$enableval],
   [use_zmq=yes])
+
+AC_ARG_ENABLE([rdseed],
+  [AS_HELP_STRING([--disable-rdseed],
+  [disable rdseed entropy (default is yes where available)])],
+  [use_rdseed=$enableval],
+  [use_rdseed=yes])
 
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
@@ -857,6 +864,12 @@ else
     BITCOIN_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])
     BITCOIN_QT_CHECK([AC_CHECK_HEADER([qrencode.h],, have_qrencode=no)])
   fi
+fi
+
+
+dnl Use rdseed to gather entropy
+if test "x$use_rdseed" = "xyes"; then
+     CXXFLAGS="$CXXFLAGS -mrdseed"
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
