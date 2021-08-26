@@ -28,6 +28,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include<iostream>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
@@ -998,11 +999,15 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
         const CScript& scriptPubKey = coin.first->tx->vout[coin.second].scriptPubKey;
         SignatureData sigdata;
 
+        //if (!ProduceSignature(  (this), scriptPubKey, sigdata))
         if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata))
         {
             return false;
         } else {
             UpdateTransaction(txNew, nIn, sigdata);
+            std::cout << "**********************New Transaction*********************" << std::endl;
+            std::cout << "     Dummy Vin.scripSig Size: " << txNew.vin[nIn].scriptSig.end() - txNew.vin[nIn].scriptSig.begin()     << std::endl;
+            std::cout << "Dummy Vin.scriptWitness Size: " << txNew.vin[nIn].scriptWitness.ToString().size() << std::endl;
         }
 
         nIn++;

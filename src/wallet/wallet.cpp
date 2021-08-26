@@ -6,16 +6,15 @@
 #include "wallet/wallet.h"
 
 #include "base58.h"
-#include "checkpoints.h"
 #include "chain.h"
-#include "dogecoin.h"
-#include "dogecoin-fees.h"
-#include "wallet/coincontrol.h"
+#include "checkpoints.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
+#include "core_io.h"
+#include "dogecoin-fees.h"
+#include "dogecoin.h"
 #include "key.h"
 #include "keystore.h"
-#include "validation.h"
 #include "net.h"
 #include "policy/policy.h"
 #include "primitives/block.h"
@@ -24,11 +23,14 @@
 #include "script/sign.h"
 #include "timedata.h"
 #include "txmempool.h"
-#include "util.h"
 #include "ui_interface.h"
+#include "util.h"
 #include "utilmoneystr.h"
-
+#include "utilstrencodings.h"
+#include "validation.h"
+#include "wallet/coincontrol.h"
 #include <assert.h>
+#include <sstream> // std::stringstream
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
@@ -2649,6 +2651,10 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 }
 
                 unsigned int nBytes = GetVirtualTransactionSize(txNew);
+                std::cout << "\n   Virtual Transaction Size: " << nBytes << std::endl;
+                CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+                txNew.Serialize(ssTx);
+                std::cout << "     Serialized Tx(Dummy) Size: " << ssTx.size() << std::endl;
 
                 CTransaction txNewConst(txNew);
                 dPriority = txNewConst.ComputePriority(dPriority, nBytes);
@@ -2658,6 +2664,10 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     vin.scriptSig = CScript();
                     vin.scriptWitness.SetNull();
                 }
+                CDataStream ssTx3(SER_NETWORK, PROTOCOL_VERSION);
+                txNew.Serialize(ssTx3);
+                std::cout << "Serialized2 Tx(Empty Sig) Size: " << ssTx3.size() << std::endl;
+
 
                 // Allow to override the default confirmation target over the CoinControl instance
                 int currentConfirmationTarget = nTxConfirmTarget;
@@ -2675,11 +2685,17 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                 }
 
                 CAmount nFeeNeeded = GetMinimumFee(txNew, nBytes, currentConfirmationTarget, mempool);
+                std::cout << "            Estimated Fee: " << nFeeNeeded << std::endl;
+                
+
                 if (coinControl && nFeeNeeded > 0 && coinControl->nMinimumTotalFee > nFeeNeeded) {
                     nFeeNeeded = coinControl->nMinimumTotalFee;
                 }
+                std::cout << "            Estimated Fee: " << nFeeNeeded << std::endl;
+
                 if (coinControl && coinControl->fOverrideFeeRate)
                     nFeeNeeded = coinControl->nFeeRate.GetFee(nBytes);
+                std::cout << "            Estimated Fee: " << nFeeNeeded << std::endl;
 
                 // If we made it here and we aren't even able to meet the relay fee on the next pass, give up
                 // because we must be at the maximum allowed fee.
@@ -2727,8 +2743,21 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
             }
         }
 
-        if (sign)
-        {
+        CTransaction txNewConst(txNew);
+        CWalletTx wtxNew3(wtxNew);
+        CWalletTx& wtxNew2 = wtxNew3;
+        CMutableTransaction txNew2(txNew);
+
+
+        // Embed the constructed transaction data in wtxNew.
+        wtxNew2.SetTx(MakeTransactionRef(std::move(txNew2)));
+        std::cout << " --Transaction Weight(No sig) Size: " << GetTransactionWeight(wtxNew2) << std::endl;
+        CDataStream ssTx6(SER_NETWORK, PROTOCOL_VERSION);
+        wtxNew2.Serialize(ssTx6);
+        std::cout << "     --Serialized WTx(No sig) Size: " << ssTx6.size() << std::endl;
+
+
+        if (sign) {
             CTransaction txNewConst(txNew);
             int nIn = 0;
             for (const auto& coin : setCoins)
@@ -2741,7 +2770,10 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                     strFailReason = _("Signing transaction failed");
                     return false;
                 } else {
+                    std::cout << "                    SIGNED." << std::endl;
                     UpdateTransaction(txNew, nIn, sigdata);
+                    std::cout << "     Real Vin.scripSig Size: " << txNew.vin[nIn].scriptSig.end() - txNew.vin[nIn].scriptSig.begin()     << std::endl;
+                    std::cout << "Real Vin.scriptWitness Size: " << txNew.vin[nIn].scriptWitness.ToString().size() << std::endl;
                 }
 
                 nIn++;
@@ -2750,6 +2782,11 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
 
         // Embed the constructed transaction data in wtxNew.
         wtxNew.SetTx(MakeTransactionRef(std::move(txNew)));
+        std::cout << " Transaction Weight(Sig) Size: " << GetTransactionWeight(wtxNew) << std::endl;
+        CDataStream ssTx2(SER_NETWORK, PROTOCOL_VERSION);
+        wtxNew.Serialize(ssTx2);
+        std::cout << "     Serialized WTx(Sig) Size: " << ssTx2.size() << std::endl;
+
 
         // Limit size
         if (GetTransactionWeight(wtxNew) >= MAX_STANDARD_TX_WEIGHT)
