@@ -870,17 +870,9 @@ fi
 
 dnl Use rdseed to gather entropy
 if test "x$use_rdseed" = "xyes"; then
-     UNAME_MACHINE_ARCH=`(uname -p 2>/dev/null || \ 
-            /sbin/$sysctl 2>/dev/null || \ 
-            /usr/sbin/$sysctl 2>/dev/null || \ 
-            echo unknown)`
+        UNAME_MACHINE_ARCH=`uname -p`
         case "${UNAME_MACHINE_ARCH}" in
-            armeb) ;;  
-            arm*)  ;; 
-            sh3el) ;; 
-            sh3eb) ;; 
-            sh5el) ;;  
-            earmv*) ;;
+            armeb | arm* | earmv* | aarch* ) ;;
             *) 
                CXXFLAGS="$CXXFLAGS -mrdseed" ;;
         esac 
