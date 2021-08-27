@@ -870,12 +870,13 @@ fi
 
 dnl Use rdseed to gather entropy
 if test "x$use_rdseed" = "xyes"; then
-        UNAME_MACHINE_ARCH=`uname -p`
-        case "${UNAME_MACHINE_ARCH}" in
-            armeb | arm* | earmv* | aarch* ) ;;
-            *) 
-               CXXFLAGS="$CXXFLAGS -mrdseed" ;;
-        esac 
+        ARM_CC=`which arm-linux-gnueabihf-g++`
+
+        if test "$ARM_CC" = "/usr/bin/arm-linux-gnueabihf-g++"; then
+          echo "Disable RDSEED."
+        else
+               CXXFLAGS="$CXXFLAGS -mrdseed" 
+        fi
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
