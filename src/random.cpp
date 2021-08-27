@@ -214,7 +214,7 @@ void GetStrongRandBytes(unsigned char* out, int num)
     //if available, use it.
     #ifdef LOWLEVEL_H    
         block_512bits buf2;
-        if ( getRDSEED(buf2.qword, 64) == 1  )
+        if ( getRDSEED(buf2.qword, 8) == 1  )
             hasher.Write(buf2.ubyte, 64);
     #endif
 
