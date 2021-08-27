@@ -867,17 +867,23 @@ else
 fi
 
 
-UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
 dnl Use rdseed to gather entropy
 if test "x$use_rdseed" = "xyes"; then
-    case "${UNAME_MACHINE}" in    
-       *arm*|*aarch*) #Do not try RDSEED with arm 
-            ;;
-       *)  #Try it everywhere else
-           CXXFLAGS="$CXXFLAGS -mrdseed"
-           ;;
-    esac
+     UNAME_MACHINE_ARCH=`(uname -p 2>/dev/null || \ 
+            /sbin/$sysctl 2>/dev/null || \ 
+            /usr/sbin/$sysctl 2>/dev/null || \ 
+            echo unknown)`
+        case "${UNAME_MACHINE_ARCH}" in
+            armeb) ;;  
+            arm*)  ;; 
+            sh3el) ;; 
+            sh3eb) ;; 
+            sh5el) ;;  
+            earmv*) ;;
+            *) 
+               CXXFLAGS="$CXXFLAGS -mrdseed" ;;
+        esac 
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
