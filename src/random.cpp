@@ -165,17 +165,11 @@ int getRDSEED( uint64_t *buff, uint32_t num){
             cumulativeStatus = 1;
     
             for( uint32_t kk = 0; kk < num; kk++){
-                //Get rng data
+                //Get RBG data
                 unsigned int rng_high, rng_low;
 
-                #if defined(__APPLE__)
-                    int32_t status1 = __rdseed32_step( &rng_low);
-                    int32_t status2 = __rdseed32_step( &rng_high);
-                #else
-                    int32_t status1 = _rdseed32_step( &rng_low );
-                    int32_t status2 = _rdseed32_step( &rng_high );
-                #endif   /*Apple detection*/
-
+                int32_t status1 = _rdseed32_step( &rng_low );
+                int32_t status2 = _rdseed32_step( &rng_high );
 
                 //Place values into a 64-bit register
                 uint64_t temp = rng_high;
@@ -218,7 +212,7 @@ void GetStrongRandBytes(unsigned char* out, int num)
             hasher.Write(buf2.ubyte, 64);
     #endif
 
-    // Produce output   
+    // Produce output
     hasher.Finalize(buf);
     memcpy(out, buf, num);
     memory_cleanse(buf, 64);

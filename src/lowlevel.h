@@ -37,8 +37,10 @@
          * You will find this function definition at:
          *    libdrng-1.0.tar.gz: https://software.intel.com/file/469237/download
          */
-        #  define __rdseed16_step(x) ({ unsigned char err; asm volatile(".byte 0x66; .byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
-        #  define __rdseed32_step(x) ({ unsigned char err; asm volatile(".byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
+        #if defined(__APPLE__)
+            #  define _rdseed16_step(x) ({ unsigned char err; asm volatile(".byte 0x66; .byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
+            #  define _rdseed32_step(x) ({ unsigned char err; asm volatile(".byte 0x0f; .byte 0xc7; .byte 0xf8; setc %1":"=a"(*x), "=qm"(err)); err; })
+        #endif
 
         /* \union Useful for buffers that will need to be hashed
          *        where data gather comes from different int types.       
