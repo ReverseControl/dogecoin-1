@@ -166,7 +166,7 @@ int getRDSEED( uint64_t *buff, uint32_t num){
     
             for( uint32_t kk = 0; kk < num; kk++){
                 //Get RBG data
-                unsigned int rng_high, rng_low;
+                uint32_t rng_high, rng_low;
 
                 int32_t status1 = _rdseed32_step( &rng_low );
                 int32_t status2 = _rdseed32_step( &rng_high );
