@@ -870,13 +870,15 @@ fi
 
 dnl Use rdseed to gather entropy
 if test "x$use_rdseed" = "xyes"; then
-        ARM_CC=`which arm-linux-gnueabihf-g++`
+        ARCH=`uname -p`
 
-        if test "$ARM_CC" = "/usr/bin/arm-linux-gnueabihf-g++"; then
-          echo "Disable RDSEED."
-        else
-               CXXFLAGS="$CXXFLAGS -mrdseed" 
-        fi
+        dnl Only enable rdseed on the compiler when targeting x86
+        case $ARCH in
+            x86 | x86_64 | i386 | x64 | i686       )  
+                CXXFLAGS="$CXXFLAGS -mrdseed" ;;
+            *)  
+                echo "Disable rdseed.";;
+        esac
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
