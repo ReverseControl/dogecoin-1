@@ -146,7 +146,7 @@ int getRDSEED( uint64_t *buff, uint32_t num){
     //Initialize state to 0, or failed.
     uint32_t  cumulativeStatus = 0;
 
-    #ifdef LOWLEVEL_H
+    #ifdef LOWELEVEL_USE_RDSEEED
         //Check to see if the processor running this code has 
         //this Instruction. Most Intel/AMD CPUs after 2015
         //should have this instruction.
@@ -190,7 +190,7 @@ int getRDSEED( uint64_t *buff, uint32_t num){
                 cumulativeStatus &= status1 & status2;
             }
         } 
-    #endif /*LOWLEVEL*/
+    #endif /*LOWLEVEL_USE_RDSEED*/
 
     return cumulativeStatus;
 }

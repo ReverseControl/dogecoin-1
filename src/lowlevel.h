@@ -14,6 +14,7 @@
 
     #ifndef LOWLEVEL_H
         #define LOWLEVEL_H
+        #define LOWLEVEL_USE_RDSEED (1)
         
         #if ( defined(_WIN32)     || defined(WIN32)   || \
               defined(__WIN32__)  || defined(__NT__) )
