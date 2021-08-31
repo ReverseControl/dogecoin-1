@@ -873,12 +873,9 @@ if test "x$use_rdseed" = "xyes"; then
         ARCH=`uname -p`
 
         dnl Only enable rdseed on the compiler when targeting x86
-        case $ARCH in
-            x86 | x86_64 | i386 | x64 | i686       )  
-                CXXFLAGS="$CXXFLAGS -mrdseed" ;;
-            *)  
-                echo "Disable rdseed.";;
-        esac
+        if [[ $ARCH = "x86" ]] || [[ $ARCH = "x86_64" ]] ; then 
+            CXXFLAGS="$CXXFLAGS -mrdseed"
+        fi
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
