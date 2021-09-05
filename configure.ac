@@ -870,12 +870,17 @@ fi
 
 dnl Use rdseed to gather entropy
 if test "x$use_rdseed" = "xyes"; then
-        ARCH=`uname -p`
-
-        dnl Only enable rdseed on the compiler when targeting x86
-        if [[ $ARCH = "x86" ]] || [[ $ARCH = "x86_64" ]] ; then 
-            CXXFLAGS="$CXXFLAGS -mrdseed"
-        fi
+  dnl Only enable rdseed on the compiler when targeting x86
+  case $host in
+    *x86*)
+      CXXFLAGS="$CXXFLAGS -mrdseed"
+      ;;
+    *i686*)
+      CXXFLAGS="$CXXFLAGS -mrdseed"
+      ;;
+    *)
+      use_rdseed="no"
+  esac
 fi
 
 save_CXXFLAGS="${CXXFLAGS}"
